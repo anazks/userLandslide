@@ -13,9 +13,17 @@ export default function Dashboard() {
     const latestReading = dataRef.ref('/landslide_data');
     
     latestReading.on('value', (snapshot) => {
-      const dbData = snapshot.val();
+      const dbData = snapshot.val() || {};
       console.log("Fetched data from Firebase: ", dbData);
-      setData(dbData || {});
+      
+      // Making Depth Moisture dynamic based on Surface Moisture (Requested by User)
+      if (dbData.surfaceMoisturePercent !== undefined) {
+        dbData.depthMoisturePercent = Math.round(dbData.surfaceMoisturePercent * 0.85);
+      } else {
+        dbData.depthMoisturePercent = 0;
+      }
+      
+      setData(dbData);
       setConnected(true);
     }, (error) => {
       console.error("Error fetching data: ", error);
